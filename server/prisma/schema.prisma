@@ -1,0 +1,36 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id       String   @id @default(uuid())
+  email    String   @unique
+  password String
+  devices  Device[]
+}
+
+model Device {
+  id          String   @id // MAC-адрес Wemos
+  name        String?
+  owner       User?    @relation(fields: [userId], references: [id])
+  userId      String?
+  metrics     Metric[]
+  lastOnline  DateTime @updatedAt
+}
+
+model Metric {
+  id        Int      @id @default(autoincrement())
+  temp      Float?
+  co2       Float?
+  humidity  Float?
+  deviceId  String
+  device    Device   @relation(fields: [deviceId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
